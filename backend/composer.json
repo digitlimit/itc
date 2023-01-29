@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Itc\\Insurance\\": "src/"
+            "ITC\\Insurance\\": "src/"
         }
     },
     "authors": [
