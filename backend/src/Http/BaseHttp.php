@@ -9,7 +9,7 @@ abstract class BaseHttp
      * 
      * @var
      */
-    protected string $baseUrl;
+    protected string $baseUrl = '';
 
     /**
      * The full url or path
@@ -81,7 +81,15 @@ abstract class BaseHttp
      * 
      * @var
      */
-    protected int $maxRetry = 0;
+    protected int $maxRetry = -1;
+
+    /**
+     * Callback for validating returned data
+     * A retry will be triggered if callback returns false
+     * 
+     * @var callable
+     */
+    protected $callback;
 
     /**
      * Set the base url of the request
@@ -253,5 +261,16 @@ abstract class BaseHttp
     public function getRetries() : int
     {
         return $this->retries;
+    }
+
+    /**
+     * Add a callback for data validation 
+     * 
+     * @return self
+     */
+    public function setCallback(callable $callback) : self
+    {
+        $this->callback = $callback;
+        return $this;
     }
 }

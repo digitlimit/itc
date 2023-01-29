@@ -3,34 +3,18 @@
 namespace ITC\Insurance\Http;
 
 use CurlHandle;
-use CurlMultiHandle;
+use Exception;
 
-class CurlHttp extends BaseHttp implements GetRequestInterface, MultipleRequestInterface
+class CurlHttp extends BaseHttp implements GetRequestInterface
 {
     /**
-     * Callback for data validation
-     * Return true for valid data or false for invalid data
+     * Curl handle
      * 
-     * @var callable 
+     * @var CurlHandle
      */
-    protected array $multipleRequests = [];
-
-    /**
-     * Curl handles
-     * 
-     * @var array
-     */
-    protected array $curlHandles = [];
-
-    /**
-     * Curl multi
-     * 
-     * @var array
-     */
-    protected CurlMultiHandle $curlMultipleHandller;
+    protected CurlHandle $handle;
 
     public function __construct(
-
         /**
          * The base url 
          * 
@@ -53,6 +37,8 @@ class CurlHttp extends BaseHttp implements GetRequestInterface, MultipleRequestI
      */
     public function get(string $url, array $params=[]) : array
     {
+        $this->handle = curl_init();
+
         $this->setRetries(0);
         $this->setMethod(self::GET);
         $this->setUrl($url);
@@ -62,51 +48,71 @@ class CurlHttp extends BaseHttp implements GetRequestInterface, MultipleRequestI
     }
 
     /**
-     * Perform multiple request concurrently
+     * Retry failed request or failed data validation
+     * 
+     * @param int   $code HTTP status code
+     * @param array $data Response from the request
      * 
      * @return array
      */
-    public function getMultiple(array $multipleRequests=[]) : array
+    protected function retry(int $code, array $data)
     {
-        foreach($multipleRequests as $request) {
-            $this->addMultipleRequest($request);
+        $this->retries++;
+
+        $maxRetry = $this->getMaxRetry();
+        $codes    = $this->getRetryStatusCodes();
+
+        // var_dump($this->retries, $maxRetry);die;
+        if(in_array($code, $codes)) {
+            // echo "Retrying ....  ($this->retries)\n";
+            sleep(1);
+            $this->handle = curl_init();
+            return $this->execute();
         }
 
-        return $this->executMultiple();
+        return $data;
     }
 
     /**
-     * Add an instance on MultipleRequest which will be used for concurrent request
-     * 
-     * @return self
-     */
-    public function addMultipleRequest(MultipleRequest $request) : self
-    {
-        $this->multipleRequests[] = $request;
-        return $this;
-    }
-
-    protected function execute() : array
-    {
-
-        return [];
-    }
-
-    /**
-     * Execute multiple curl requests
+     * Execute curl request
      * 
      * @return array
      */
-    protected function executMultiple() : array
+    protected function execute() : array
     {
-        
-        $this->curlMultipleHandller = curl_multi_init(); // init the curl Multi
-var_dump($this->curlMultipleHandller);
-        // foreach($this->multipleRequests as $request)
-        // {
-        //     $this->curlHandles[]
-        // }
+        curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $this->getMethod());
+        curl_setopt($this->handle, CURLOPT_URL, $this->getUrl());
+        curl_setopt($this->handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->handle, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
+       
+        if(!empty($this->getParams())){
+            curl_setopt(
+                $this->handle, 
+                CURLOPT_POSTFIELDS, 
+                http_build_query($this->getParams())
+            );
+        }
 
-        return [];
+        try{
+            $response = curl_exec($this->handle);
+            $error    = curl_error($this->handle);
+            $code     = curl_getinfo($this->handle, CURLINFO_HTTP_CODE);
+            $data     = json_decode($response, true) ?? [];
+
+            if($error){
+                throw new Exception('Unknown error');
+            } 
+
+            if($this->callback && !call_user_func($this->callback, $data)) {
+                throw new Exception('Callback validation failed');
+            }
+           
+        } catch(Exception $e) {
+            $code = 500;
+            return $this->retry($code, $data);
+        }
+
+        curl_close($this->handle);
+        return $data;
     }
 }

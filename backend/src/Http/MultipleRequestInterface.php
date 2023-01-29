@@ -9,12 +9,12 @@ interface MultipleRequestInterface
      * 
      * @return array
      */
-    public function getMultiple(array $multipleRequest=[]) : array;
+    public function get(array $multipleRequests=[]) : array;
 
     /**
      * Add an instance on MultipleRequest
      * 
      * @return self
      */
-    public function addMultipleRequest(MultipleRequest $request) : self;
+    public function addRequest(MultipleRequest $request) : self;
 }
