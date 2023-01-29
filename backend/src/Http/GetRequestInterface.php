@@ -1,6 +1,6 @@
 <?php
 
-namespace IT\Insurance\Http;
+namespace ITC\Insurance\Http;
 
 interface GetRequestInterface
 {

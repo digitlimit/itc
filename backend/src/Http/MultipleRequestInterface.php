@@ -1,6 +1,6 @@
 <?php
 
-namespace IT\Insurance\Http;
+namespace ITC\Insurance\Http;
 
 interface MultipleRequestInterface
 {
@@ -9,5 +9,12 @@ interface MultipleRequestInterface
      * 
      * @return array
      */
-    public function getMultiple(string $url, array $data=[]) : array;
+    public function getMultiple(array $multipleRequest=[]) : array;
+
+    /**
+     * Add an instance on MultipleRequest
+     * 
+     * @return self
+     */
+    public function addMultipleRequest(MultipleRequest $request) : self;
 }
