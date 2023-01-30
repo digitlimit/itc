@@ -7,7 +7,7 @@ use ITC\Insurance\Http\CurlHttp;
 use ITC\Insurance\Http\MultiCurlHttp;
 use ITC\Insurance\Http\MultipleRequest;
 
-class Product
+class Product extends Base
 {
     /**
      * Get a list of products
@@ -82,11 +82,28 @@ class Product
         {
             $detail = array_values($detail)[0] ?? [];
 
+            if(empty($detail)) {
+                continue;
+            }
+
+            // clean up
+            $suppliers = [];
+            if(isset($detail['suppliers']) && is_array($detail['suppliers'])){
+                foreach($detail['suppliers'] as $supplier) {
+                    $suppliers[] = self::cleanString($supplier);
+                }
+            }
+
+            // clean up
+            $name        = self::cleanString($detail['name'] ?? '');
+            $description = self::cleanString($detail['description'] ?? '');
+            $type        = self::cleanString($detail['type'] ?? '');
+
             $newDetails[] = [
-                'name'        => $detail['name'] ?? '',
-                'description' => $detail['description'] ?? '',
-                'type'        => ucwords($detail['type']) ?? '',
-                'suppliers'   => $detail['suppliers'] ?? [],
+                'name'        => $name,
+                'description' => $description,
+                'type'        => ucwords($type),
+                'suppliers'   => $suppliers,
             ];
         }
 
