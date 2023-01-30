@@ -1,9 +1,19 @@
 (function() {
    
+    /**
+     * The product class
+     * Handles the creation of HTML template for product lists
+     * 
+     * @param {*} name 
+     * @param {*} description 
+     * @param {*} type 
+     * @param {*} suppliers 
+     */
     function Product(name, description, type, suppliers)
     {
         let nameHtml = function() {
-            return `<h3 class="name">${name}  - ${type}</h3>`;	
+            type = type ? ' - ' + type : '';
+            return `<h3 class="name">${name} ${type}</h3>`;	
         }
 
         let descriptionHtml = function() {
@@ -39,6 +49,11 @@
         }
     }
 
+    /**
+     * Handles the card display
+     * 
+     * @param {*} products 
+     */
     function Card(products) 
     {
         let productsHtml = function() 
@@ -67,7 +82,14 @@
         }
     }
 
-    fetch('http://localhost:8000/insurance')
+    /**
+     * Make API call 
+     * 
+     * NB: This fetch command is not supported in all browsers
+     */
+    let baseUrl = 'http://localhost:8000';
+
+    fetch(baseUrl + '/insurance')
         .then((response) => response.json())
         .then((products) => {
             let productCard = new Card(products);
