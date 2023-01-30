@@ -37,6 +37,13 @@ class MultiCurlHttp extends BaseHttp implements MultipleRequestInterface
      */
     protected $callback;
 
+    /**
+     * Response contents
+     * 
+     * @var array
+     */
+    protected array $contents = [];
+
     public function __construct(
         /**
          * The base url 
@@ -88,22 +95,18 @@ class MultiCurlHttp extends BaseHttp implements MultipleRequestInterface
      * 
      * @return array
      */
-    protected function retry(int $code, array $data) : array
+    protected function retry() : array
     {
         $this->retries++;
 
         $maxRetry = $this->getMaxRetry();
         $codes    = $this->getRetryStatusCodes();
+        
+        echo "Retrying ....  ($this->retries)\n";
 
-        // var_dump($this->retries, $maxRetry);die;
-        if(in_array($code, $codes)) {
-            // echo "Retrying ....  ($this->retries)\n";
-            sleep(1);
-            $this->handle = curl_multi_init();
-            return $this->execute();
-        }
-
-        return $data;
+        sleep(1);
+        $this->handle = curl_multi_init();
+        return $this->execute();
     }
 
     /**
@@ -116,15 +119,15 @@ class MultiCurlHttp extends BaseHttp implements MultipleRequestInterface
         foreach($this->requests as $request)
         {
             // create both cURL resources
-            $curlHandle = curl_init(); 
-            $url = $request->getUrl();
+            $handle = curl_init(); 
+            $url    = $request->getUrl();
 
-            curl_setopt($curlHandle, CURLOPT_URL, $url);
-            curl_setopt($curlHandle, CURLOPT_HEADER, 0);
-            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-            curl_multi_add_handle($this->handle, $curlHandle);
+            curl_setopt($handle, CURLOPT_URL, $url);
+            curl_setopt($handle, CURLOPT_HEADER, 0);
+            curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+            curl_multi_add_handle($this->handle, $handle);
 
-            $this->handles[$url] = $curlHandle;
+            $this->handles[$url] = $handle;
         }
 
         //execute the handles
@@ -142,16 +145,36 @@ class MultiCurlHttp extends BaseHttp implements MultipleRequestInterface
         }
        
         // get contents
-        $data = [];
-        foreach($this->handles as $url=>$ch) 
+        $retryFlag = false;
+        foreach($this->handles as $url => $handle) 
         {
-            $data[] = curl_multi_getcontent($ch); 
-            curl_multi_remove_handle($this->handle, $ch); 
+            $response = curl_multi_getcontent($handle); 
+
+            if($response) 
+            {
+                // convert response to array
+                $content = json_decode($response, true);
+
+                // run callback validation if given
+                $valid   = $this->callback 
+                    ? call_user_func($this->callback, $content) 
+                    : true;
+
+                // if valid remove and add to contents
+                if($valid) {
+                    $this->contents[$url] = $content;
+                    curl_multi_remove_handle($this->handle, $handle); 
+                }
+            }
+        }
+
+        if($retryFlag) {
+            return $this->retry();
         }
  
         // close curl multi
         curl_multi_close($this->handle);
 
-        return $data;
+        return $this->contents;
     }
 }

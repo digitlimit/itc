@@ -18,7 +18,9 @@ class Product
     {
         try {
             $curl = new CurlHttp('https://itccompliance.co.uk/recruitment-webservice/api');
-            $curl->setCallback(fn($data) => isset($data['products'])); 
+
+            // data validation callback
+            $curl->setCallback(fn($content) => !isset($content['error']));
 
             // get products
             $list = $curl->get('list');
@@ -53,9 +55,7 @@ class Product
             $curl = new MultiCurlHttp();
 
             // data validation callback
-            $curl->setCallback(function($data){
-
-            }); 
+            $curl->setCallback(fn($content) => !isset($content['error'])); 
 
             return $curl->get($requests);
 
@@ -74,8 +74,8 @@ class Product
      * 
      * @return array
      */
-    public function transformInfo(array $details)
-    {
+    public static function transformInfo(array $details)
+    { return $details;
         $newDetails = [];
 
         return $newDetails;

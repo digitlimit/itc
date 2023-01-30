@@ -2,6 +2,8 @@
 
 namespace ITC\Insurance\Controllers;
 
+use ITC\Insurance\Services\Product;
+
 class InsuranceController extends BaseController
 {
     /**
@@ -11,12 +13,13 @@ class InsuranceController extends BaseController
      */
     public function response() : array 
     {
-        return $products = $this->getProducts();
+        // get product list
+        $products = Product::list();
 
-        // get details
-        // $details = $this->getProductDetails($products);
+        // get product details
+        $details  = Product::info($products);
 
-
-        return [];
+        // transform and return sanitized details
+        return Product::transformInfo($details);
     }
 }
