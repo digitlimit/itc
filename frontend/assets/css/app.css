@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700");
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+body {
+    padding: 24px;
+    font-family: "Source Sans Pro", sans-serif;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+.container {
+    max-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.card {
+    width: 100%;
+    border: 1px solid #EEEEEE;
+}
+
+.title {
+    color: #4f4c4c;
+    width: 100%;
+    background: rgb(219, 212, 212);
+    padding: 1.5rem;
+}
+
+.product {
+  width: 100%;
+  padding: 1.5rem;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.product:last-child {
+    border-bottom: 0;
+}
+
+.product .name,
+.product .description,
+.product .type,
+.product .suppliers {
+    width: 100%;
+    margin-bottom: 0.8rem;
+}
+
+.suppliers .supplier{
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: bisque;
+}

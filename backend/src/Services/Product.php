@@ -75,8 +75,20 @@ class Product
      * @return array
      */
     public static function transformInfo(array $details)
-    { return $details;
+    { 
         $newDetails = [];
+
+        foreach($details as $detail) 
+        {
+            $detail = array_values($detail)[0] ?? [];
+
+            $newDetails[] = [
+                'name'        => $detail['name'] ?? '',
+                'description' => $detail['description'] ?? '',
+                'type'        => ucwords($detail['type']) ?? '',
+                'suppliers'   => $detail['suppliers'] ?? [],
+            ];
+        }
 
         return $newDetails;
     }
