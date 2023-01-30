@@ -8,9 +8,9 @@ class Base
     /**
      * Helper for sanitizing a string
      * 
-     * @param array $details An array of product info
+     * @param string $string String that will be clean
      * 
-     * @return array
+     * @return string
      */
     protected static function cleanString($string)
     { 

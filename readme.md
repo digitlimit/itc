@@ -34,3 +34,13 @@ The page was tested on the latest google chrome but will work for later.
 I could not write tests because I have limited time. I take tests seriously. Please forgive me.
 
 I spent so time trying to get accurate regex for cleaning the data, not perfect at the moment, so needs improvement
+
+## Screenshots
+
+The frontend:
+
+![Alt text](/screenshot.png?raw=true "Optional Title")
+
+Complete separation of frontend and backend
+
+![Alt text](/screenshot2.png?raw=true "Optional Title")
