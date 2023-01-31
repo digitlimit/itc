@@ -61,7 +61,7 @@
             let html = '';
 
             products.forEach(function(item){
-                console.log(item)
+                // console.log(item)
                 var product = new Product(
                     item.name,
                     item.description,
@@ -87,15 +87,63 @@
      * 
      * NB: This fetch command is not supported in all browsers
      */
-    let baseUrl = 'http://localhost:8000';
+    function API(baseUrl) 
+    {
+        /**
+         * Build the request url
+         * 
+         * @param {*} path 
+         * @param {*} params 
+         * @returns 
+         */
+        let getUrl = function(path, params) 
+        {
+            // remove leading slash
+            path = path.replace(/^\/+/g, '');
 
-    fetch(baseUrl + '/insurance')
-        .then((response) => response.json())
-        .then((products) => {
-            let productCard = new Card(products);
-            productCard.addToDom();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            // build url
+            let url = new URL(baseUrl + '/' + path);
+
+            // build params if exists
+            if(typeof params === 'object' 
+                && params !== null 
+                && Object.keys(params).length !== 0
+            ) {
+                url += '?' + new URLSearchParams(params);
+            }
+
+            return url;
+        }
+
+        /**
+         * Perform GET request 
+         * 
+         * @param {*} path 
+         * @param {*} params 
+         * @param {*} successCallback 
+         * @param {*} errorCallback 
+         */
+        this.get = function(path, params, successCallback, errorCallback) 
+        {
+            fetch(getUrl(path, params))
+                .then((response) => response.json())
+                .then((response) => successCallback(response))
+                .catch((error)   => errorCallback(error));
+        }
+    }
+
+    /**
+     * Make API call 
+     * 
+     * NB: This fetch command is not supported in all browsers
+     */
+    let baseUrl = 'http://localhost:8000';
+    let api = new API(baseUrl);
+
+    api.get('insurance', {}, function(products){
+        let productCard = new Card(products);
+        productCard.addToDom();
+    }, function(error) {
+        console.error('Error:', error);
+    });
 })();
